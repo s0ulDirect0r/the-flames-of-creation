@@ -3,23 +3,36 @@ extends Node2D
 @onready var terrain_layer = $"TerrainLayer (TileMapLayer)"
 @onready var player = $Player
 @onready var enemy = $Enemy
+@onready var timer_label = $CanvasLayer/Label
 var player_grid_pos = Vector2i(0, 0)
 var enemy_grid_pos = Vector2i(2, 2)
 var current_turn = "player"
 var player_attacked = false
 var player_moved = false
 var enemy_hp = 2
-
+var turn_timer = 20.0
+const max_turn_time = 20.0
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	print("player position: ", player.position)
 	player_grid_pos = terrain_layer.local_to_map(player.position)
+	player.position = terrain_layer.map_to_local(player_grid_pos)
 	print("player_grid_pos: ", player_grid_pos)
 	enemy_grid_pos = terrain_layer.local_to_map(enemy.position)
+	enemy.position = terrain_layer.map_to_local(enemy_grid_pos)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
+	if (current_turn == "player"):
+		turn_timer -= delta
+		timer_label.text = str(turn_timer)
+		if turn_timer <= 0:
+			current_turn = "enemy"
+			player_attacked = false
+			player_moved = false
+			turn_timer = max_turn_time
+			enemy_turn()
 	pass
 
 func _unhandled_input(event: InputEvent) -> void:
